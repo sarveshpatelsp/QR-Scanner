@@ -6,7 +6,7 @@ import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-import android.widget.Button
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
@@ -25,13 +25,19 @@ class MainActivity : AppCompatActivity() {
                 startScanner()
             }
         }
+    private lateinit var textView : TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mainBinding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(mainBinding.root)
+        textView = findViewById(R.id.text_qrname)
         mainBinding.startScanner.setOnClickListener {
             requestCameraAndStartScanner()
+        }
+        textView.setOnClickListener{
+            val urlIntent = Intent(Intent.ACTION_VIEW , Uri.parse(textView.text.toString()))
+            startActivity(urlIntent)
         }
     }
 
@@ -60,16 +66,30 @@ class MainActivity : AppCompatActivity() {
         barcodes.forEach{barcode ->
             when (barcode.valueType){
                 Barcode.TYPE_URL -> {
-                    mainBinding.textQrcontent.text = barcode.url!!.url!!
+                    mainBinding.textQrname.text = barcode.url!!.url!!
                 }
                 Barcode.TYPE_CONTACT_INFO -> {
-                    mainBinding.textQrcontent.text = barcode.contactInfo.toString()
+                    val contactInfo = barcode.contactInfo
+                    if(contactInfo != null){
+                        mainBinding.textQrname.text = contactInfo.name?.formattedName
+                        mainBinding.textQremail.text = contactInfo.emails.firstOrNull()?.address
+                        mainBinding.textQrphone.text = contactInfo.phones.firstOrNull()?.number
+                    }
                 }
                 Barcode.TYPE_EMAIL -> {
-                    mainBinding.textQrcontent.text = barcode.email.toString()
+                    mainBinding.textQrname.text = barcode.email?.address
                 }
+
+                Barcode.TYPE_PHONE -> {
+                    mainBinding.textQrname.text = barcode.phone?.number
+                }
+
+                Barcode.TYPE_SMS -> {
+                    mainBinding.textQrname.text = barcode.sms?.message
+                }
+
                 else -> {
-                    mainBinding.textQrcontent.text = barcode.rawValue.toString()
+                    mainBinding.textQrname.text = barcode.rawValue.toString()
                 }
             }
         }
