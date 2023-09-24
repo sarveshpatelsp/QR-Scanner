@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">QR Scanner</string>
+    <string name="take_photo">Take Photo</string>
+    <string name="start_scanner">Start Scanner</string>
+    <string name="start_capture">Start Capture</string>
+</resources>
